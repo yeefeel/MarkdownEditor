@@ -520,7 +520,7 @@ async function saveAsFile() {
 /* ==================== 关于 ==================== */
 const APP_VERSION = '1.0.0';
 const APP_AUTHOR = 'flyfeel@gmail.com';
-const APP_HOMEPAGE = '';   // 后续填入 GitHub 地址，例如 'https://github.com/xxx/markdown-editor'
+const APP_HOMEPAGE = 'https://github.com/yeefeel/MarkdownEditor';
 
 function openExternal(url) {
   const a = api();

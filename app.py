@@ -322,6 +322,7 @@ def run_selftest(win, api):
         rec('about_version', "document.getElementById('about-version').textContent")
         rec('about_author', "document.getElementById('about-author').textContent")
         rec('about_homepage', "document.getElementById('about-homepage').textContent")
+        rec('about_homepage_link', "document.querySelector('#about-homepage a') ? document.querySelector('#about-homepage a').textContent : 'NONE'")
         js("document.getElementById('btn-about-close').click()")
         time.sleep(0.2)
         rec('about_closed', "document.getElementById('about-mask').classList.contains('hidden')")
