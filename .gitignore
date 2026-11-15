@@ -1,0 +1,17 @@
+# Python
+__pycache__/
+*.py[cod]
+
+# PyInstaller 构建产物
+build/
+dist/
+
+# 编辑器 / 工具缓存
+.vscode/
+.trae/
+.trae-html-share-packages/
+.screenshots/
+
+# 系统文件
+Thumbs.db
+desktop.ini
