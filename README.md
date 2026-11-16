@@ -15,7 +15,7 @@
 
 直接下载编译好的单文件程序，解压或放到任意目录即可使用，无需安装：
 
-**[⬇ 下载最新版本](https://github.com/yeefeel/MarkdownEditor/releases/latest)**
+**[⬇ 下载最新版本](https://gitee.com/yeefeel/MarkdownEditor/releases/latest)**
 
 > 程序未做代码签名，首次运行时 Windows SmartScreen 可能提示“已保护你的电脑”，点“更多信息 → 仍要运行”即可。
 
