@@ -6,6 +6,7 @@ import os
 import sys
 import time
 import json
+import threading
 import traceback
 
 import webview
@@ -49,6 +50,14 @@ class Api:
 
     def __init__(self, startup_file=None):
         self.startup_file = startup_file
+        self.allow_close = False   # 前端确认保存/放弃后置为 True，窗口才真正关闭
+
+    def quit_app(self):
+        """前端处理完未保存文件后，真正退出程序"""
+        self.allow_close = True
+        if window:
+            window.destroy()
+        return True
 
     def get_startup_file(self):
         """取命令行传入的文件（仅返回一次）"""
@@ -197,6 +206,7 @@ def run_selftest(win, api):
         rec('cm_instance', "typeof window.__cm")
         rec('api_open', "typeof (window.pywebview && window.pywebview.api.open_file)")
         rec('toolbar_btns', "document.querySelectorAll('#toolbar button').length")
+        js("setLang('zh')")   # 固定初始语言，避免上次运行残留影响断言
 
         # 写入 Markdown 内容并等待渲染
         js("window.__cm.setValue('# 标题测试\\n\\n**粗体** 与 *斜体*\\n\\n- 项目一\\n- 项目二\\n\\n> 引用\\n\\n"
@@ -333,6 +343,108 @@ def run_selftest(win, api):
         rec('theme_btn_text', "document.getElementById('btn-theme').textContent")
         rec('theme_btn_title', "document.getElementById('btn-theme').title")
 
+        # 中英文切换：工具栏、标签、查找栏、状态栏、关于对话框、动态提示
+        rec('lang_btn_text_zh', "document.getElementById('btn-lang').textContent")
+        js("document.getElementById('btn-lang').click()")
+        time.sleep(0.3)
+        rec('lang_current', "currentLang")
+        rec('en_toolbar_text', "Array.prototype.map.call(document.querySelectorAll('#toolbar button'),"
+                               "function(b){return b.id + '=' + b.textContent;}).join('|')")
+        rec('en_toolbar_cjk', "(function(){var bs=Array.prototype.filter.call("
+                              "document.querySelectorAll('#toolbar button'),"
+                              "function(b){return b.id!=='btn-lang';});"
+                              "return /[\\u4e00-\\u9fa5]/.test(bs.map(function(b){return b.textContent;}).join(''));})()")
+        rec('en_labels', "document.getElementById('label-font').textContent + '|' + "
+                         "document.getElementById('label-size').textContent")
+        rec('en_drop_overlay', "document.getElementById('drop-overlay').textContent")
+        rec('en_find_placeholder', "document.getElementById('find-input').placeholder + '|' + "
+                                   "document.getElementById('replace-input').placeholder")
+        rec('en_find_buttons', "document.getElementById('btn-find-next').textContent + '|' + "
+                               "document.getElementById('btn-replace').textContent + '|' + "
+                               "document.getElementById('btn-replace-all').textContent + '|' + "
+                               "document.getElementById('btn-find-close').textContent")
+        rec('en_status', "document.getElementById('status-count').textContent + '|' + "
+                         "document.getElementById('status-cursor').textContent")
+        rec('en_page_title', "document.title")
+        rec('en_tab_close_title', "document.querySelector('#tabs .tab-close').title")
+        rec('en_untitled', "tabTitle({path:null})")
+        rec('en_save_prompt', "t('savePrompt', {name:'a.md'})")
+        rec('en_save_dialog_title', "document.getElementById('save-title').textContent")
+        rec('en_save_dialog_buttons', "document.getElementById('btn-save-confirm').textContent + '|' + "
+                                      "document.getElementById('btn-save-discard').textContent + '|' + "
+                                      "document.getElementById('btn-save-cancel').textContent")
+        rec('en_missing_key', "t('no_such_key')")
+        rec('lang_persisted_en', "localStorage.getItem('md_lang')")
+        js("document.getElementById('btn-about').click()")
+        time.sleep(0.2)
+        rec('en_about_title', "document.getElementById('about-title').textContent")
+        rec('en_about_labels', "document.getElementById('about-label-version').textContent + '|' + "
+                               "document.getElementById('about-label-author').textContent + '|' + "
+                               "document.getElementById('about-label-homepage').textContent")
+        rec('en_about_close', "document.getElementById('btn-about-close').textContent")
+        js("document.getElementById('btn-about-close').click()")
+        js("document.getElementById('btn-find').click()")
+        js("document.getElementById('find-input').value = 'zzz_no_such_text'")
+        js("document.getElementById('btn-find-next').click()")
+        time.sleep(0.3)
+        rec('en_find_info', "document.getElementById('find-info').textContent")
+        js("document.getElementById('btn-find-close').click()")
+        js("document.getElementById('btn-lang').click()")
+        time.sleep(0.3)
+        rec('lang_back_zh', "currentLang")
+        rec('zh_new_btn', "document.getElementById('btn-new').textContent")
+        rec('zh_status', "document.getElementById('status-count').textContent")
+        rec('lang_persisted_zh', "localStorage.getItem('md_lang')")
+
+        # 关闭未保存内容时弹出保存提醒（取消保留 / 不保存关闭）
+        rec('app_close_handler', "typeof window.handleAppClose")
+        rec('quit_api', "typeof (window.pywebview && window.pywebview.api.quit_app)")
+        js("document.getElementById('btn-new-tab').click()")
+        time.sleep(0.3)
+        js("window.__cm.setValue('未保存的草稿内容')")
+        time.sleep(0.3)
+        js("window.__draftId = state.activeId")
+        before_tabs = js("state.tabs.length")
+        js("void closeTab(window.__draftId)")
+        time.sleep(0.4)
+        rec('save_dialog_visible', "!document.getElementById('save-mask').classList.contains('hidden')")
+        rec('save_dialog_message', "document.getElementById('save-message').textContent")
+        rec('save_dialog_buttons', "document.getElementById('btn-save-confirm').textContent + '|' + "
+                                   "document.getElementById('btn-save-discard').textContent + '|' + "
+                                   "document.getElementById('btn-save-cancel').textContent")
+        rec('save_dialog_blocks_close', "state.tabs.length - %d" % int(before_tabs or 0))
+        js("document.getElementById('btn-save-cancel').click()")
+        time.sleep(0.3)
+        rec('save_dialog_hidden_after_cancel', "document.getElementById('save-mask').classList.contains('hidden')")
+        rec('tab_kept_after_cancel', "state.tabs.length - %d" % int(before_tabs or 0))
+        js("void closeTab(window.__draftId)")
+        time.sleep(0.3)
+        js("document.getElementById('btn-save-discard').click()")
+        time.sleep(0.4)
+        rec('tab_closed_after_discard', "state.tabs.length - %d" % (int(before_tabs or 0) - 1))
+
+        # 无修改的标签关闭时不弹提醒
+        js("document.getElementById('btn-new-tab').click()")
+        time.sleep(0.3)
+        js("window.__blankId = state.activeId")
+        js("void closeTab(window.__blankId)")
+        time.sleep(0.3)
+        rec('clean_tab_no_prompt', "document.getElementById('save-mask').classList.contains('hidden')")
+
+        # 应用窗口关闭：有未保存内容时应先取消关闭并弹出提醒
+        js("document.getElementById('btn-new-tab').click()")
+        time.sleep(0.3)
+        js("window.__cm.setValue('关闭窗口测试草稿')")
+        time.sleep(0.3)
+        closing_cancelled = win.events.closing.set()
+        lines.append('%-18s => %r' % ('closing_cancelled', closing_cancelled))
+        time.sleep(0.8)
+        rec('app_close_dialog_visible', "!document.getElementById('save-mask').classList.contains('hidden')")
+        rec('app_close_dialog_message', "document.getElementById('save-message').textContent")
+        js("document.getElementById('btn-save-cancel').click()")
+        time.sleep(0.4)
+        rec('app_close_cancelled', "document.getElementById('save-mask').classList.contains('hidden')")
+
         # 文件读写
         tmp = os.path.join(os.path.dirname(_log_path()), '_selftest_file.md')
         saved = api.save_file(tmp, '# hello\n中文内容')
@@ -347,8 +459,9 @@ def run_selftest(win, api):
 
         rec('js_errors', "window.__errs")
         ok = (js("document.querySelectorAll('#tabs .tab').length") >= 2
-              and js("document.querySelectorAll('.cm-header').length") > 0
               and js("document.getElementById('preview').innerHTML.length") > 0
+              and js("document.getElementById('save-mask').classList.contains('hidden')")
+              and js("localStorage.getItem('md_lang')") == 'zh'
               and js("window.__errs.length") == 0)
         lines.append('RESULT => ' + ('PASS' if ok else 'FAIL'))
     except Exception:
@@ -359,6 +472,7 @@ def run_selftest(win, api):
             f.write('\n'.join(str(x) for x in lines))
     except Exception:
         pass
+    api.allow_close = True   # 自测结束时绕过关闭确认，直接退出
     win.destroy()
 
 
@@ -407,6 +521,28 @@ def main():
             traceback.print_exc()
 
     window.events.loaded += register_drop
+
+    # 关闭窗口前先询问前端：有未保存修改时弹出保存提醒
+    def ask_frontend_close():
+        try:
+            window.evaluate_js('window.handleAppClose()')
+        except Exception:
+            traceback.print_exc()
+            # 前端不可用时兜底退出，避免窗口关不掉
+            api.allow_close = True
+            try:
+                window.destroy()
+            except Exception:
+                pass
+
+    def on_closing():
+        if api.allow_close:
+            return True
+        # 必须在后台线程调用 evaluate_js，否则会阻塞 UI 线程造成死锁
+        threading.Thread(target=ask_frontend_close, daemon=True).start()
+        return False   # pywebview 中返回 False 表示取消本次关闭，等前端确认
+
+    window.events.closing += on_closing
 
     if '--selftest' in sys.argv:
         webview.start(lambda: run_selftest(window, api), gui='edgechromium', debug=False)

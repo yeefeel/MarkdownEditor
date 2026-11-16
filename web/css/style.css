@@ -153,6 +153,73 @@ body {
   background: var(--hover);
 }
 
+/* 未保存提醒对话框 */
+#save-mask {
+  position: fixed;
+  inset: 0;
+  z-index: 10000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(0, 0, 0, 0.45);
+}
+
+#save-dialog {
+  width: 420px;
+  max-width: 90vw;
+  padding: 20px 24px 18px;
+  background: var(--bg);
+  color: var(--fg);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.3);
+}
+
+#save-dialog h3 {
+  font-size: 16px;
+  margin-bottom: 10px;
+}
+
+#save-message {
+  margin-bottom: 18px;
+  font-size: 13px;
+  line-height: 1.6;
+  color: var(--muted);
+  word-break: break-all;
+}
+
+.save-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+}
+
+.save-actions button {
+  padding: 6px 18px;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  background: var(--bg);
+  color: var(--fg);
+  cursor: pointer;
+  font-family: inherit;
+  font-size: 13px;
+}
+
+.save-actions button:hover {
+  background: var(--hover);
+}
+
+.save-actions button.primary {
+  background: var(--active);
+  border-color: var(--active);
+  color: var(--active-fg);
+}
+
+.save-actions button.primary:hover {
+  background: var(--active);
+  opacity: 0.9;
+}
+
 /* 工具栏 */
 #toolbar {
   display: flex;

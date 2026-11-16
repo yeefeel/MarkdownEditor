@@ -29,7 +29,7 @@
   </div>
   <div class="divider"></div>
   <div class="group">
-    <label>字体
+    <label><span id="label-font">字体</span>
       <select id="font-family">
         <option value="微软雅黑">微软雅黑</option>
         <option value="宋体">宋体</option>
@@ -39,7 +39,7 @@
         <option value="Arial">Arial</option>
       </select>
     </label>
-    <label>字号
+    <label><span id="label-size">字号</span>
       <select id="font-size">
         <option value="12">12</option>
         <option value="13">13</option>
@@ -63,6 +63,7 @@
   <div class="divider"></div>
   <div class="group">
     <button id="btn-theme" title="切换主题">主题</button>
+    <button id="btn-lang" title="切换到英文">EN</button>
     <button id="btn-about" title="关于">关于</button>
   </div>
 </div>
@@ -70,12 +71,25 @@
 <!-- 关于对话框 -->
 <div id="about-mask" class="hidden">
   <div id="about-dialog">
-    <h2>Markdown 编辑器</h2>
-    <div class="about-row"><span class="about-label">版本</span><span id="about-version">-</span></div>
-    <div class="about-row"><span class="about-label">作者</span><span id="about-author">flyfeel@gmail.com</span></div>
-    <div class="about-row"><span class="about-label">主页</span><span id="about-homepage">待补充</span></div>
+    <h2 id="about-title">Markdown 编辑器</h2>
+    <div class="about-row"><span class="about-label" id="about-label-version">版本</span><span id="about-version">-</span></div>
+    <div class="about-row"><span class="about-label" id="about-label-author">作者</span><span id="about-author">flyfeel@gmail.com</span></div>
+    <div class="about-row"><span class="about-label" id="about-label-homepage">主页</span><span id="about-homepage">待补充</span></div>
     <div class="about-actions">
       <button id="btn-about-close">关闭</button>
+    </div>
+  </div>
+</div>
+
+<!-- 未保存提醒对话框 -->
+<div id="save-mask" class="hidden">
+  <div id="save-dialog">
+    <h3 id="save-title">未保存的修改</h3>
+    <p id="save-message"></p>
+    <div class="save-actions">
+      <button id="btn-save-confirm" class="primary">保存</button>
+      <button id="btn-save-discard">不保存</button>
+      <button id="btn-save-cancel">取消</button>
     </div>
   </div>
 </div>

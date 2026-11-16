@@ -8,43 +8,246 @@ function showError(msg) {
   banner.textContent = window.__errs.join('\n');
 }
 window.addEventListener('error', (e) => {
-  showError((e.message || '未知错误') + (e.filename ? ' @ ' + e.filename + ':' + e.lineno : ''));
+  showError((e.message || t('unknownError')) + (e.filename ? ' @ ' + e.filename + ':' + e.lineno : ''));
 });
 window.addEventListener('unhandledrejection', (e) => {
-  showError('Promise 异常: ' + (e.reason && e.reason.message ? e.reason.message : e.reason));
+  showError(t('promiseError', { error: e.reason && e.reason.message ? e.reason.message : e.reason }));
 });
 
 /* ==================== 多语言 ==================== */
 const I18N = {
   zh: {
-    undo: '撤销',
-    redo: '恢复',
-    theme: '主题',
-    undoTitle: '撤销 (Ctrl+Z)',
-    redoTitle: '恢复 (Ctrl+Y)',
+    appTitle: 'Markdown 编辑器',
+    new: '新建', newTitle: '新建 (Ctrl+N)',
+    open: '打开', openTitle: '打开 (Ctrl+O)',
+    save: '保存', saveTitle: '保存 (Ctrl+S)',
+    saveAs: '另存为', saveAsTitle: '另存为 (Ctrl+Shift+S)',
+    undo: '撤销', undoTitle: '撤销 (Ctrl+Z)',
+    redo: '恢复', redoTitle: '恢复 (Ctrl+Y)',
+    find: '查找', findTitle: '查找 (Ctrl+F)',
+    fontLabel: '字体',
+    sizeLabel: '字号',
+    zoomReset: '重置缩放', zoomResetTitle: '重置缩放 (Ctrl+0)',
+    modeEdit: '编辑', modeEditTitle: '仅编辑',
+    modeSplit: '分屏', modeSplitTitle: '分屏',
+    modePreview: '预览', modePreviewTitle: '仅预览',
+    theme: '主题', themeTitle: '切换主题',
     themeToDark: '切换到深色主题',
     themeToLight: '切换到浅色主题',
+    about: '关于', aboutTitle: '关于',
+    lang: 'EN', langTitle: '切换到英文',
+    aboutHeading: 'Markdown 编辑器',
+    aboutVersion: '版本', aboutAuthor: '作者', aboutHomepage: '主页',
+    aboutHomepageEmpty: '待补充',
+    aboutClose: '关闭',
+    unknownError: '未知错误',
+    promiseError: 'Promise 异常: {error}',
+    initFailed: '初始化失败: {error}',
+    newTabTitle: '新建标签 (Ctrl+N)',
+    closeTabTitle: '关闭标签 (Ctrl+W)',
+    untitled: '未命名',
+    modified: '● 已修改',
+    cursorText: '行 {line}, 列 {col}',
+    countText: '{chars} 字 / {words} 词 / {lines} 行',
+    dropOverlay: '松开鼠标即可打开文件（新标签）',
+    findPlaceholder: '查找...',
+    replacePlaceholder: '替换为...',
+    findNext: '下一个',
+    replace: '替换',
+    replaceAll: '全部替换',
+    findClose: '关闭',
+    notFound: '未找到',
+    previewNotFound: '预览中未找到',
+    position: '位置 {pos}',
+    replaced: '已替换 {count} 处',
+    previewReadonly: '预览模式为只读，请切到编辑或分屏模式替换',
+    renderFailed: '渲染失败: {error}',
+    insertText: '文本',
+    saveDialogTitle: '未保存的修改',
+    savePrompt: '「{name}」有未保存的修改，是否保存？',
+    discardChanges: '不保存',
+    cancel: '取消',
+    apiUnavailable: '文件接口不可用，请通过 exe 启动程序',
+    openFailed: '打开失败: {error}',
+    openNoPath: '打开失败: 未获取到文件路径',
+    openError: '打开文件异常: {error}',
+    saveFailed: '保存失败: {error}',
+    saveError: '保存异常: {error}',
+    saveAsFailed: '另存为失败: {error}',
+    saveAsError: '另存为异常: {error}',
+    dropOpenFailed: '打开「{name}」失败: {error}',
+    dropOpenError: '打开拖入文件失败: {error}',
+    startupFailed: '打开启动文件失败: {error}',
+    fontYahei: '微软雅黑', fontSong: '宋体', fontDeng: '等线',
+  },
+  en: {
+    appTitle: 'Markdown Editor',
+    new: 'New', newTitle: 'New (Ctrl+N)',
+    open: 'Open', openTitle: 'Open (Ctrl+O)',
+    save: 'Save', saveTitle: 'Save (Ctrl+S)',
+    saveAs: 'Save As', saveAsTitle: 'Save As (Ctrl+Shift+S)',
+    undo: 'Undo', undoTitle: 'Undo (Ctrl+Z)',
+    redo: 'Redo', redoTitle: 'Redo (Ctrl+Y)',
+    find: 'Find', findTitle: 'Find (Ctrl+F)',
+    fontLabel: 'Font',
+    sizeLabel: 'Size',
+    zoomReset: 'Reset Zoom', zoomResetTitle: 'Reset Zoom (Ctrl+0)',
+    modeEdit: 'Edit', modeEditTitle: 'Editor only',
+    modeSplit: 'Split', modeSplitTitle: 'Split view',
+    modePreview: 'Preview', modePreviewTitle: 'Preview only',
+    theme: 'Theme', themeTitle: 'Toggle theme',
+    themeToDark: 'Switch to dark theme',
+    themeToLight: 'Switch to light theme',
+    about: 'About', aboutTitle: 'About',
+    lang: '中文', langTitle: '切换到中文',
+    aboutHeading: 'Markdown Editor',
+    aboutVersion: 'Version', aboutAuthor: 'Author', aboutHomepage: 'Homepage',
+    aboutHomepageEmpty: 'Not set',
+    aboutClose: 'Close',
+    unknownError: 'Unknown error',
+    promiseError: 'Promise error: {error}',
+    initFailed: 'Initialization failed: {error}',
+    newTabTitle: 'New tab (Ctrl+N)',
+    closeTabTitle: 'Close tab (Ctrl+W)',
+    untitled: 'Untitled',
+    modified: '● Modified',
+    cursorText: 'Ln {line}, Col {col}',
+    countText: '{chars} chars / {words} words / {lines} lines',
+    dropOverlay: 'Drop to open file in a new tab',
+    findPlaceholder: 'Find...',
+    replacePlaceholder: 'Replace with...',
+    findNext: 'Next',
+    replace: 'Replace',
+    replaceAll: 'Replace All',
+    findClose: 'Close',
+    notFound: 'Not found',
+    previewNotFound: 'Not found in preview',
+    position: 'Position {pos}',
+    replaced: 'Replaced {count} occurrence(s)',
+    previewReadonly: 'Preview is read-only. Switch to Edit or Split to replace.',
+    renderFailed: 'Render failed: {error}',
+    insertText: 'text',
+    saveDialogTitle: 'Unsaved Changes',
+    savePrompt: '"{name}" has unsaved changes. Save before closing?',
+    discardChanges: "Don't Save",
+    cancel: 'Cancel',
+    apiUnavailable: 'File API unavailable. Please launch the desktop app.',
+    openFailed: 'Open failed: {error}',
+    openNoPath: 'Open failed: no file path returned',
+    openError: 'Open error: {error}',
+    saveFailed: 'Save failed: {error}',
+    saveError: 'Save error: {error}',
+    saveAsFailed: 'Save As failed: {error}',
+    saveAsError: 'Save As error: {error}',
+    dropOpenFailed: 'Failed to open "{name}": {error}',
+    dropOpenError: 'Failed to open dropped file: {error}',
+    startupFailed: 'Failed to open startup file: {error}',
+    fontYahei: 'Microsoft YaHei', fontSong: 'SimSun', fontDeng: 'DengXian',
   },
 };
 
 let currentLang = 'zh';
 
-function t(key) {
+function t(key, vars) {
   const dict = I18N[currentLang] || I18N.zh;
-  if (dict[key] !== undefined) return dict[key];
-  return I18N.zh[key] !== undefined ? I18N.zh[key] : key;
+  let text = dict[key] !== undefined ? dict[key] : (I18N.zh[key] !== undefined ? I18N.zh[key] : key);
+  if (vars) {
+    Object.keys(vars).forEach(function (name) {
+      text = text.split('{' + name + '}').join(String(vars[name]));
+    });
+  }
+  return text;
 }
 
+/* 工具栏等静态元素的文案绑定：[元素 id, 文本 key, title key] */
+const I18N_BUTTONS = [
+  ['btn-new', 'new', 'newTitle'],
+  ['btn-open', 'open', 'openTitle'],
+  ['btn-save', 'save', 'saveTitle'],
+  ['btn-saveas', 'saveAs', 'saveAsTitle'],
+  ['btn-undo', 'undo', 'undoTitle'],
+  ['btn-redo', 'redo', 'redoTitle'],
+  ['btn-find', 'find', 'findTitle'],
+  ['btn-zoom-reset', 'zoomReset', 'zoomResetTitle'],
+  ['btn-mode-edit', 'modeEdit', 'modeEditTitle'],
+  ['btn-mode-split', 'modeSplit', 'modeSplitTitle'],
+  ['btn-mode-preview', 'modePreview', 'modePreviewTitle'],
+  ['btn-theme', 'theme', null],
+  ['btn-about', 'about', 'aboutTitle'],
+  ['btn-lang', 'lang', 'langTitle'],
+  ['btn-find-next', 'findNext', null],
+  ['btn-replace', 'replace', null],
+  ['btn-replace-all', 'replaceAll', null],
+  ['btn-find-close', 'findClose', null],
+  ['btn-about-close', 'aboutClose', null],
+  ['btn-save-confirm', 'save', null],
+  ['btn-save-discard', 'discardChanges', null],
+  ['btn-save-cancel', 'cancel', null],
+];
+
+const I18N_LABELS = [
+  ['label-font', 'fontLabel'],
+  ['label-size', 'sizeLabel'],
+  ['about-title', 'aboutHeading'],
+  ['about-label-version', 'aboutVersion'],
+  ['about-label-author', 'aboutAuthor'],
+  ['about-label-homepage', 'aboutHomepage'],
+  ['save-title', 'saveDialogTitle'],
+];
+
+/* 字体下拉：值不变，仅翻译显示名 */
+const I18N_FONT_OPTIONS = [
+  ['微软雅黑', 'fontYahei'],
+  ['宋体', 'fontSong'],
+  ['等线', 'fontDeng'],
+];
+
 function applyI18n() {
-  const undoBtn = document.getElementById('btn-undo');
-  const redoBtn = document.getElementById('btn-redo');
+  document.title = t('appTitle');
+  document.documentElement.lang = currentLang === 'zh' ? 'zh-CN' : 'en';
+
+  I18N_BUTTONS.forEach(function (item) {
+    const el = document.getElementById(item[0]);
+    if (!el) return;
+    el.textContent = t(item[1]);
+    if (item[2]) el.title = t(item[2]);
+  });
+
+  I18N_LABELS.forEach(function (item) {
+    const el = document.getElementById(item[0]);
+    if (el) el.textContent = t(item[1]);
+  });
+
+  I18N_FONT_OPTIONS.forEach(function (item) {
+    const opt = fontSelect && fontSelect.querySelector('option[value="' + item[0] + '"]');
+    if (opt) opt.textContent = t(item[1]);
+  });
+
   const themeBtn = document.getElementById('btn-theme');
-  if (undoBtn) { undoBtn.textContent = t('undo'); undoBtn.title = t('undoTitle'); }
-  if (redoBtn) { redoBtn.textContent = t('redo'); redoBtn.title = t('redoTitle'); }
   if (themeBtn) {
-    themeBtn.textContent = t('theme');
     themeBtn.title = state.theme === 'dark' ? t('themeToLight') : t('themeToDark');
   }
+
+  const newTabBtn = document.getElementById('btn-new-tab');
+  if (newTabBtn) newTabBtn.title = t('newTabTitle');
+
+  if (findInput) findInput.placeholder = t('findPlaceholder');
+  if (replaceInput) replaceInput.placeholder = t('replacePlaceholder');
+
+  const overlay = document.getElementById('drop-overlay');
+  if (overlay) overlay.textContent = t('dropOverlay');
+}
+
+function setLang(lang) {
+  currentLang = lang === 'en' ? 'en' : 'zh';
+  localStorage.setItem('md_lang', currentLang);
+  applyI18n();
+  renderTabs();
+  updateStatus();
+}
+
+function toggleLang() {
+  setLang(currentLang === 'zh' ? 'en' : 'zh');
 }
 
 /* ==================== 状态 ==================== */
@@ -108,8 +311,8 @@ marked.use({ gfm: true, breaks: true, renderer: mdRenderer });
 
 /* ==================== 标签管理 ==================== */
 function tabTitle(tab) {
-  if (!tab) return '未命名';
-  if (!tab.path) return '未命名';
+  if (!tab) return t('untitled');
+  if (!tab.path) return t('untitled');
   const parts = tab.path.split(/[\\/]/);
   return parts[parts.length - 1] || tab.path;
 }
@@ -170,14 +373,22 @@ function activateTab(id) {
   cm.focus();
 }
 
-function closeTab(id) {
-  const idx = state.tabs.findIndex((t) => t.id === id);
+async function closeTab(id) {
+  let idx = state.tabs.findIndex((t) => t.id === id);
   if (idx < 0) return;
 
   const tab = state.tabs[idx];
   if (id === state.activeId) syncActiveFromEditor();
 
-  if (tab.dirty && !confirm('「' + tabTitle(tab) + '」有未保存的修改，确定关闭吗？')) return;
+  // 有未保存修改时先询问，避免误操作丢数据
+  if (tab.dirty) {
+    const choice = await askSave(t('savePrompt', { name: tabTitle(tab) }));
+    if (choice === 'cancel') return;
+    if (choice === 'save' && !(await saveTab(tab, false))) return;
+  }
+
+  idx = state.tabs.findIndex((t) => t.id === id);
+  if (idx < 0) return;
 
   state.tabs.splice(idx, 1);
 
@@ -253,7 +464,7 @@ function renderTabs() {
     const el = document.createElement('div');
     el.className = 'tab' + (tab.id === state.activeId ? ' active' : '');
     el.dataset.tabId = tab.id;
-    el.title = tab.path || '未命名';
+    el.title = tab.path || t('untitled');
 
     const dot = document.createElement('span');
     dot.className = 'tab-dot' + (tab.dirty ? ' on' : '');
@@ -265,7 +476,7 @@ function renderTabs() {
     const close = document.createElement('span');
     close.className = 'tab-close';
     close.textContent = '×';
-    close.title = '关闭标签 (Ctrl+W)';
+    close.title = t('closeTabTitle');
     close.addEventListener('click', (e) => {
       e.stopPropagation();
       closeTab(tab.id);
@@ -292,7 +503,7 @@ function updateTabDot(tab) {
   if (!el) return;
   const dot = el.querySelector('.tab-dot');
   if (dot) dot.classList.toggle('on', !!tab.dirty);
-  el.title = tab.path || '未命名';
+  el.title = tab.path || t('untitled');
   const name = el.querySelector('.tab-name');
   if (name) name.textContent = tabTitle(tab);
 }
@@ -350,7 +561,7 @@ function render() {
   try {
     previewEl.innerHTML = marked.parse(src);
   } catch (e) {
-    previewEl.innerHTML = '<p style="color:#d1242f">渲染失败: ' + e.message + '</p>';
+    previewEl.innerHTML = '<p style="color:#d1242f">' + t('renderFailed', { error: e.message }) + '</p>';
   }
 
   // 重新渲染后，若正处于预览查找状态，重新应用高亮
@@ -363,7 +574,7 @@ function render() {
       findInfo.textContent = (previewHitIndex + 1) + '/' + count;
     } else {
       previewHitIndex = -1;
-      findInfo.textContent = '预览中未找到';
+      findInfo.textContent = t('previewNotFound');
     }
   }
 }
@@ -377,18 +588,18 @@ function updateStatus() {
   const tab = activeTab();
   const text = cm ? cm.getValue() : '';
 
-  statusFile.textContent = tab && tab.path ? tab.path : '未命名';
-  statusModified.textContent = tab && tab.dirty ? '● 已修改' : '';
+  statusFile.textContent = tab && tab.path ? tab.path : t('untitled');
+  statusModified.textContent = tab && tab.dirty ? t('modified') : '';
   statusZoom.textContent = state.zoomLevel + '%';
 
   const chars = text.length;
   const lines = text.split('\n').length;
   const words = text.trim() ? text.trim().split(/\s+/).length : 0;
-  statusCount.textContent = chars + ' 字 / ' + words + ' 词 / ' + lines + ' 行';
+  statusCount.textContent = t('countText', { chars: chars, words: words, lines: lines });
 
   if (cm) {
     const cur = cm.getCursor();
-    statusCursor.textContent = '行 ' + (cur.line + 1) + ', 列 ' + (cur.ch + 1);
+    statusCursor.textContent = t('cursorText', { line: cur.line + 1, col: cur.ch + 1 });
   }
 }
 
@@ -461,60 +672,66 @@ function api() {
 
 async function openFile() {
   const a = api();
-  if (!a) { alert('文件接口不可用，请通过 exe 启动程序'); return; }
+  if (!a) { alert(t('apiUnavailable')); return; }
   try {
     const result = await a.open_file();
     if (!result || result === null) return;                 // 用户取消
-    if (result.error) { alert('打开失败: ' + result.error); return; }
-    if (!result.path) { alert('打开失败: 未获取到文件路径'); return; }
+    if (result.error) { alert(t('openFailed', { error: result.error })); return; }
+    if (!result.path) { alert(t('openNoPath')); return; }
     openInTab(result.path, result.content || '');
   } catch (e) {
-    alert('打开文件异常: ' + (e && e.message ? e.message : e));
+    alert(t('openError', { error: e && e.message ? e.message : e }));
   }
 }
 
-async function saveFile() {
-  const tab = activeTab();
-  if (!tab) return;
-  if (!tab.path) return saveAsFile();
-
+/* 保存指定标签；forceAs 强制弹出另存为对话框。返回是否保存成功 */
+async function saveTab(tab, forceAs) {
+  if (!tab) return false;
   const a = api();
-  if (!a) { alert('文件接口不可用，请通过 exe 启动程序'); return; }
+  if (!a) { alert(t('apiUnavailable')); return false; }
+
+  if (tab.id === state.activeId && cm) tab.content = cm.getValue();
+
   try {
-    const result = await a.save_file(tab.path, cm ? cm.getValue() : '');
-    if (result === true) {
-      tab.dirty = false;
-      updateTabDot(tab);
-      updateStatus();
-      persistTabsNow();
-    } else if (result && result.error) {
-      alert('保存失败: ' + result.error);
+    if (!forceAs && tab.path) {
+      const result = await a.save_file(tab.path, tab.content);
+      if (result === true) {
+        tab.dirty = false;
+        updateTabDot(tab);
+        updateStatus();
+        persistTabsNow();
+        return true;
+      }
+      if (result && result.error) alert(t('saveFailed', { error: result.error }));
+      return false;
     }
-  } catch (e) {
-    alert('保存异常: ' + (e && e.message ? e.message : e));
-  }
-}
 
-async function saveAsFile() {
-  const tab = activeTab();
-  if (!tab) return;
-
-  const a = api();
-  if (!a) { alert('文件接口不可用，请通过 exe 启动程序'); return; }
-  try {
-    const result = await a.save_as(cm ? cm.getValue() : '');
-    if (!result) return;                                     // 用户取消
-    if (result.error) { alert('另存为失败: ' + result.error); return; }
+    const result = await a.save_as(tab.content);
+    if (!result) return false;                               // 用户取消
+    if (result.error) { alert(t('saveAsFailed', { error: result.error })); return false; }
     if (result.path) {
       tab.path = result.path;
       tab.dirty = false;
       updateTabDot(tab);
       updateStatus();
       persistTabsNow();
+      return true;
     }
+    return false;
   } catch (e) {
-    alert('另存为异常: ' + (e && e.message ? e.message : e));
+    alert(t('saveError', { error: e && e.message ? e.message : e }));
+    return false;
   }
+}
+
+async function saveFile() {
+  const tab = activeTab();
+  if (tab) await saveTab(tab, false);
+}
+
+async function saveAsFile() {
+  const tab = activeTab();
+  if (tab) await saveTab(tab, true);
 }
 
 /* ==================== 关于 ==================== */
@@ -536,7 +753,7 @@ function renderHomepage(url) {
   if (!hp) return;
   hp.innerHTML = '';
   if (!url) {
-    hp.textContent = '待补充';
+    hp.textContent = t('aboutHomepageEmpty');
     return;
   }
   const a = document.createElement('a');
@@ -558,6 +775,69 @@ function closeAbout() {
   if (mask) mask.classList.add('hidden');
 }
 
+/* ==================== 未保存提醒 ==================== */
+let saveDialogResolve = null;
+
+/* 弹出保存提醒，返回 Promise<'save'|'discard'|'cancel'> */
+function askSave(message) {
+  return new Promise(function (resolve) {
+    if (saveDialogResolve) { resolve('cancel'); return; }   // 已有对话框时不再叠加
+    saveDialogResolve = resolve;
+    document.getElementById('save-message').textContent = message;
+    document.getElementById('save-mask').classList.remove('hidden');
+    document.getElementById('btn-save-confirm').focus();
+  });
+}
+
+function finishSaveDialog(choice) {
+  const mask = document.getElementById('save-mask');
+  if (mask) mask.classList.add('hidden');
+  const resolve = saveDialogResolve;
+  saveDialogResolve = null;
+  if (resolve) resolve(choice);
+}
+
+function bindSaveDialog() {
+  document.getElementById('btn-save-confirm').addEventListener('click', function () { finishSaveDialog('save'); });
+  document.getElementById('btn-save-discard').addEventListener('click', function () { finishSaveDialog('discard'); });
+  document.getElementById('btn-save-cancel').addEventListener('click', function () { finishSaveDialog('cancel'); });
+  document.getElementById('save-mask').addEventListener('click', function (e) {
+    if (e.target.id === 'save-mask') finishSaveDialog('cancel');
+  });
+  document.addEventListener('keydown', function (e) {
+    if (e.key !== 'Escape') return;
+    const mask = document.getElementById('save-mask');
+    if (mask && !mask.classList.contains('hidden')) {
+      e.stopPropagation();
+      finishSaveDialog('cancel');
+    }
+  }, true);
+}
+
+/* 应用窗口关闭：逐个处理未保存标签，全部处理完才真正退出 */
+let appClosePending = false;
+
+async function handleAppClose() {
+  if (appClosePending || saveDialogResolve) return;
+  appClosePending = true;
+  try {
+    syncActiveFromEditor();
+    const dirtyTabs = state.tabs.filter(function (t) { return t.dirty; });
+    for (let i = 0; i < dirtyTabs.length; i++) {
+      const tab = dirtyTabs[i];
+      if (tab.id === state.activeId && cm) tab.content = cm.getValue();
+      const choice = await askSave(t('savePrompt', { name: tabTitle(tab) }));
+      if (choice === 'cancel') return;
+      if (choice === 'save' && !(await saveTab(tab, false))) return;
+    }
+    const a = api();
+    if (a && a.quit_app) await a.quit_app();
+  } finally {
+    appClosePending = false;
+  }
+}
+window.handleAppClose = handleAppClose;
+
 /* ==================== 启动文件（双击 .md / 命令行参数） ==================== */
 async function openStartupFile() {
   const a = api();
@@ -566,7 +846,7 @@ async function openStartupFile() {
     const path = await a.get_startup_file();
     if (path) await openDroppedPaths([path]);
   } catch (e) {
-    showError('打开启动文件失败: ' + (e && e.message ? e.message : e));
+    showError(t('startupFailed', { error: e && e.message ? e.message : e }));
   }
 }
 
@@ -579,10 +859,10 @@ async function openDroppedPaths(paths) {
     try {
       const r = await a.read_file(p);
       if (!r) continue;
-      if (r.error) { alert('打开「' + p + '」失败: ' + r.error); continue; }
+      if (r.error) { alert(t('dropOpenFailed', { name: p, error: r.error })); continue; }
       if (r.path) openInTab(r.path, r.content || '');
     } catch (e) {
-      alert('打开拖入文件失败: ' + (e && e.message ? e.message : e));
+      alert(t('dropOpenError', { error: e && e.message ? e.message : e }));
     }
   }
 }
@@ -689,7 +969,7 @@ function findNextInPreview() {
   }
 
   if (previewHits.length === 0) {
-    findInfo.textContent = '预览中未找到';
+    findInfo.textContent = t('previewNotFound');
     return;
   }
 
@@ -729,7 +1009,7 @@ function findNext() {
   let index = text.indexOf(query, lastFindIndex);
   if (index < 0) index = text.indexOf(query, 0);
   if (index < 0) {
-    findInfo.textContent = '未找到';
+    findInfo.textContent = t('notFound');
     return;
   }
   const from = cm.posFromIndex(index);
@@ -737,11 +1017,11 @@ function findNext() {
   cm.setSelection(from, to);
   cm.scrollIntoView({ from: from, to: to }, 60);
   lastFindIndex = index + query.length;
-  findInfo.textContent = '位置 ' + (index + 1);
+  findInfo.textContent = t('position', { pos: index + 1 });
 }
 
 function replaceOne() {
-  if (state.mode === 'preview') { findInfo.textContent = '预览模式为只读，请切到编辑或分屏模式替换'; return; }
+  if (state.mode === 'preview') { findInfo.textContent = t('previewReadonly'); return; }
   const query = findInput.value;
   if (!query || !cm) return;
   const sel = cm.getSelection();
@@ -753,19 +1033,19 @@ function replaceOne() {
 }
 
 function replaceAll() {
-  if (state.mode === 'preview') { findInfo.textContent = '预览模式为只读，请切到编辑或分屏模式替换'; return; }
+  if (state.mode === 'preview') { findInfo.textContent = t('previewReadonly'); return; }
   const query = findInput.value;
   if (!query || !cm) return;
   const text = cm.getValue();
   const count = text.split(query).length - 1;
-  if (count === 0) { findInfo.textContent = '未找到'; return; }
+  if (count === 0) { findInfo.textContent = t('notFound'); return; }
   // 用 replaceRange 替换全文，使“全部替换”本身也是一次可撤销的操作
   cm.operation(function () {
     cm.replaceRange(text.split(query).join(replaceInput.value),
       { line: 0, ch: 0 }, cm.posFromIndex(text.length));
   });
   markDirty();
-  findInfo.textContent = '已替换 ' + count + ' 处';
+  findInfo.textContent = t('replaced', { count: count });
 }
 
 /* ==================== 编辑辅助 ==================== */
@@ -784,7 +1064,7 @@ function markDirty() {
 function insertMarkdown(prefix, suffix) {
   if (!cm) return;
   const sel = cm.getSelection() || '';
-  const body = sel || '文本';
+  const body = sel || t('insertText');
   cm.replaceSelection(prefix + body + suffix, 'around');
   const cur = cm.getCursor();
   if (!sel) {
@@ -887,6 +1167,7 @@ function bindEvents() {
   document.getElementById('btn-mode-split').addEventListener('click', () => setMode('split'));
   document.getElementById('btn-mode-preview').addEventListener('click', () => setMode('preview'));
   document.getElementById('btn-theme').addEventListener('click', () => setTheme(state.theme === 'dark' ? 'light' : 'dark'));
+  document.getElementById('btn-lang').addEventListener('click', toggleLang);
 
   const newTabBtn = document.getElementById('btn-new-tab');
   if (newTabBtn) newTabBtn.addEventListener('click', addBlankTab);
@@ -975,7 +1256,9 @@ function init() {
     const savedSize = localStorage.getItem('md_font_size');
     const savedTheme = localStorage.getItem('md_theme');
     const savedMode = localStorage.getItem('md_mode');
+    const savedLang = localStorage.getItem('md_lang');
 
+    if (savedLang === 'en' || savedLang === 'zh') currentLang = savedLang;
     if (savedFamily) { state.fontFamily = savedFamily; fontSelect.value = savedFamily; }
     if (savedSize) { state.baseFontSize = parseInt(savedSize, 10); sizeSelect.value = savedSize; }
     setTheme(savedTheme || 'light');
@@ -983,6 +1266,7 @@ function init() {
 
     initEditor();
     bindEvents();
+    bindSaveDialog();
     bindDropEvents();
     applyI18n();
     applyFont();
@@ -991,7 +1275,7 @@ function init() {
     cm.focus();
     openStartupFile();
   } catch (e) {
-    showError('初始化失败: ' + e.message + '\n' + (e.stack || ''));
+    showError(t('initFailed', { error: e.message }) + '\n' + (e.stack || ''));
   }
 }
 
