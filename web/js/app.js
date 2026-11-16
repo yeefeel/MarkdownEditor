@@ -735,7 +735,7 @@ async function saveAsFile() {
 }
 
 /* ==================== 关于 ==================== */
-const APP_VERSION = '1.0.0';
+const APP_VERSION = '1.1.0';
 const APP_AUTHOR = 'flyfeel@gmail.com';
 const APP_HOMEPAGE = 'https://github.com/yeefeel/MarkdownEditor';
 
